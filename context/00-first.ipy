@@ -1,0 +1,14 @@
+import logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
+
+import pandas 
+pandas.set_option("display.max_columns", 500)
+pandas.set_option("display.max_rows", 100)
+pandas.set_option("display.max_colwidth", 500)
+
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot 
+# init_notebook_mode should not be called in startup script
+# https://github.com/plotly/plotly.py/issues/511
+# init_notebook_mode(connected=True)
