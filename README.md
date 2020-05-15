@@ -4,7 +4,7 @@
 
 Provide Jupyter notebook environment which includes;
 - OS: ubuntu
-- Basic libraries (pandas, numpy, scipy, sklearn, plotly, matplotlib)
+- Basic libraries (jupyter, numpy, pandas + libraries described in `context/pythonlib/requirements.txt`)
 
 ## Usage
 
