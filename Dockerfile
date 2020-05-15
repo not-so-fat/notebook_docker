@@ -5,6 +5,7 @@ ARG USERID=8888
 ARG PASSWORD=neo
 # USERNAME is just internal and fixed (to use it in chown option for ADD)
 ENV USERNAME=neo
+ENV SHELL=/bin/bash
 
 USER root
 RUN apt-get update \
@@ -43,8 +44,8 @@ WORKDIR /home/${USERNAME}/
 ENV LANG=en_US.UTF-8
 RUN virtualenv -p python3 venv && chmod 700 ./venv/bin/activate
 RUN venv/bin/pip install -U pip setuptools
-RUN venv/bin/pip install jupyter notebook pandas numpy scipy sklearn plotly matplotlib
-RUN venv/bin/pip install /home/${USERNAME}/pythonlib/*.whl
+RUN venv/bin/pip install jupyter notebook pandas
+RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/notebook_workspace

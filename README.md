@@ -5,13 +5,12 @@
 Provide Jupyter notebook environment which includes;
 - OS: ubuntu
 - Basic libraries (pandas, numpy, scipy, sklearn, plotly, matplotlib)
-- (Optional) Your own Python libraries
 
 ## Usage
 
 ### Build
 
-1. Put your wheel package for python libraries under `context/pythonlib`
+1. Edit `context/pythonlib/requirements.txt` to change Python libraries to be installed
 2. run `build.sh ${PASSWORD_FOR_USER}`
 
 ### Run
