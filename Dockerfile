@@ -47,7 +47,6 @@ RUN venv/bin/pip install -U pip setuptools
 RUN venv/bin/pip install jupyter notebook pandas
 RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt
 
-USER ${USERNAME}
 WORKDIR /home/${USERNAME}/notebook_workspace
 EXPOSE 8888
 ENV PYTHONPATH=/home/${USERNAME}/pythonlib/
