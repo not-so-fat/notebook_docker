@@ -2,3 +2,4 @@ numpy
 scipy
 sklearn
 conjurer
+mlflow
