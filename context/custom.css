@@ -58,6 +58,16 @@ div.input_area {
 div.input_prompt {
     color: #11731c
 }
+div.cell.selected.before, div.cell.selected.jupyter-soft-selected.before {
+    background: #11731c;
+}
+div.cell.selected, div.cell.selected.jupyter-soft-selected {
+    border: medium solid #92e4dd;
+}
+.edit_mode div.cell.selected, div.cell.selected.jupyter-soft-selected{
+    background: #c4b643;
+    border: medium solid #92e4dd;
+}
 
 div.output_wrapper {
  background-color: white;
@@ -98,4 +108,25 @@ body[data-notebook-path] {
 div#notebook_list_header.row.list_header {
  color: #92e4dd;
  background-color: transparent;
+}
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+    background-color: #92e4dd;
+    border-color: #92e4dd;
+}
+.nav-tabs {
+    border-bottom: 1px solid #92e4dd;
+}
+.list_container {
+    border: 1px solid #92e4dd;
+}
+
+span#login_widget > .button, #logout, #shutdown {
+    background-color: #92e4dd;
+    border-color: #92e4dd;
+}
+
+.btn-default {
+    background-color: #92e4dd;
+    border-color: #92e4dd;
 }
