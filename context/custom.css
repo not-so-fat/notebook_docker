@@ -1,0 +1,101 @@
+/*
+    Header & Navigation bar
+*/
+
+
+
+body > #header {
+    background: #0A0A07;
+}
+
+body > #header .header-bar {
+    background: #92e4dd;
+}
+
+#ipython_notebook img{
+ display:none;
+}
+
+.notebook_app>#header,
+.edit_app>#header {
+    color: #92e4dd;
+}
+
+.navbar-default {
+    background: none;
+    border: none;
+}
+
+.navbar-default .navbar-nav > li > a, #kernel_indicator {
+    color: #92e4dd;
+    transition: all 0.25s;
+}
+
+.navbar-default .navbar-nav > li > a:hover, #kernel_indicator:hover {
+    border-bottom: 2px solid #fff;
+    color: #92e4dd;
+}
+
+
+/*
+    Notebook & Text editor
+*/
+
+@media not print {
+    .notebook_app #notebook {
+        background: #0A0A07;
+    }
+    .notebook_app #notebook-container,
+    .edit_app #texteditor-backdrop {
+        background: #0A0A07;
+    }
+}
+
+div.input_area {
+    background: #03313b;
+    border: 1px solid #92e4dd;
+}
+div.input_prompt {
+    color: #11731c
+}
+
+div.output_wrapper {
+ background-color: white;
+ border: 0px;
+ left: 0px;
+ margin-bottom: 0em;
+ margin-top: 0em;
+ border-top-right-radius: 0px;
+ border-top-left-radius: 0px;
+}
+
+div.CodeMirror,
+div.CodeMirror pre {
+ color: #92e4dd;
+}
+
+#texteditor-backdrop #texteditor-container .CodeMirror-gutter,
+.CodeMirror-gutters {
+    background: #0A0A07;
+    border-right: 0px;
+    color: #11731c;
+}
+
+.CodeMirror span.cm-variable {
+  color: #92e4dd;
+}
+
+
+/*
+    Notebook explorer
+*/
+
+body[data-notebook-path] {
+    background-color: #0A0A07;
+    color: #92e4dd;
+}
+
+div#notebook_list_header.row.list_header {
+ color: #92e4dd;
+ background-color: transparent;
+}

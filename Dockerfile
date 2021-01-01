@@ -35,6 +35,7 @@ RUN mkdir -p /home/${USERNAME}/pythonlib \
 ADD context/pythonlib /home/${USERNAME}/pythonlib
 ADD context/00-first.ipy /home/${USERNAME}/.ipython/profile_default/startup/
 ADD context/jupyter_notebook_config.py /home/${USERNAME}/.jupyter/
+ADD context/custom.css /home/${USERNAME}/.jupyter/custom/
 WORKDIR /home/${USERNAME}/install
 RUN chown -R ${USERNAME} /home/${USERNAME}
 
@@ -44,11 +45,8 @@ WORKDIR /home/${USERNAME}/
 ENV LANG=en_US.UTF-8
 RUN virtualenv -p python3 venv && chmod 700 ./venv/bin/activate
 RUN venv/bin/pip install -U pip setuptools
-RUN venv/bin/pip install jupyter notebook pandas jupyterthemes
+RUN venv/bin/pip install jupyter notebook pandas
 RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt
-
-# Apply Jupyter theme
-RUN venv/bin/jt -t chesterish
 
 WORKDIR /home/${USERNAME}/notebook_workspace
 EXPOSE 8888
