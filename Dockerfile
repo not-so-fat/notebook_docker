@@ -44,8 +44,11 @@ WORKDIR /home/${USERNAME}/
 ENV LANG=en_US.UTF-8
 RUN virtualenv -p python3 venv && chmod 700 ./venv/bin/activate
 RUN venv/bin/pip install -U pip setuptools
-RUN venv/bin/pip install jupyter notebook pandas
+RUN venv/bin/pip install jupyter notebook pandas jupyterthemes
 RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt
+
+# Apply Jupyter theme
+RUN venv/bin/jt -t chesterish
 
 WORKDIR /home/${USERNAME}/notebook_workspace
 EXPOSE 8888
