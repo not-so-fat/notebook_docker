@@ -35,6 +35,7 @@ RUN mkdir -p /home/${USERNAME}/pythonlib \
 ADD context/pythonlib /home/${USERNAME}/pythonlib
 ADD context/00-first.ipy /home/${USERNAME}/.ipython/profile_default/startup/
 ADD context/jupyter_notebook_config.py /home/${USERNAME}/.jupyter/
+ADD context/custom.css /home/${USERNAME}/.jupyter/custom/
 WORKDIR /home/${USERNAME}/install
 RUN chown -R ${USERNAME} /home/${USERNAME}
 
