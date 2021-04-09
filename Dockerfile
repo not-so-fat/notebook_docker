@@ -51,4 +51,5 @@ RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt
 WORKDIR /home/${USERNAME}/notebook_workspace
 EXPOSE 8888
 ENV PYTHONPATH=/home/${USERNAME}/pythonlib/
+ENV PATH=$PATH:/home/${USERNAME}/venv/bin
 CMD ["../venv/bin/jupyter", "notebook"]
