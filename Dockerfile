@@ -25,22 +25,24 @@ RUN apt-get update \
 
 RUN pip3 install virtualenv
 
-# Since the option of ADD does not recognize ENV/ARG, use ADD as `root` and chown
 RUN useradd -ms /bin/bash --uid ${USERID} ${USERNAME}
 RUN usermod -aG sudo ${USERNAME}
 RUN echo "${USERNAME}:${PASSWORD}" | chpasswd
-RUN mkdir -p /home/${USERNAME}/pythonlib \
-        /home/${USERNAME}/notebook_workspace \
-        /home/${USERNAME}/install 
-ADD context/pythonlib /home/${USERNAME}/pythonlib
-ADD context/00-first.ipy /home/${USERNAME}/.ipython/profile_default/startup/
-ADD context/jupyter_notebook_config.py /home/${USERNAME}/.jupyter/
-ADD context/custom.css /home/${USERNAME}/.jupyter/custom/
-WORKDIR /home/${USERNAME}/install
+RUN mkdir -p /home/${USERNAME}
+RUN mkdir /mlflow
 RUN chown -R ${USERNAME} /home/${USERNAME}
+RUN chown -R ${USERNAME} /mlflow
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/
+RUN mkdir -p /home/${USERNAME}/pythonlib \
+        /home/${USERNAME}/notebook_workspace \
+        /home/${USERNAME}/install 
+ADD --chown ${USERNAME}:${USERNAME} context/pythonlib /home/${USERNAME}/pythonlib
+ADD --chown ${USERNAME}:${USERNAME} context/00-first.ipy /home/${USERNAME}/.ipython/profile_default/startup/
+ADD --chown ${USERNAME}:${USERNAME} context/jupyter_notebook_config.py /home/${USERNAME}/.jupyter/
+ADD --chown ${USERNAME}:${USERNAME} context/custom.css /home/${USERNAME}/.jupyter/custom/
+
 # To install cuid
 ENV LANG=en_US.UTF-8
 RUN virtualenv -p python3 venv && chmod 700 ./venv/bin/activate
@@ -51,5 +53,5 @@ RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt
 WORKDIR /home/${USERNAME}/notebook_workspace
 EXPOSE 8888
 ENV PYTHONPATH=/home/${USERNAME}/pythonlib/
-ENV PATH=$PATH:/home/${USERNAME}/venv/bin
+ENV PATH=/home/${USERNAME}/venv/bin:$PATH
 CMD ["../venv/bin/jupyter", "notebook"]
