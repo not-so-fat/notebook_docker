@@ -38,10 +38,10 @@ WORKDIR /home/${USERNAME}/
 RUN mkdir -p /home/${USERNAME}/pythonlib \
         /home/${USERNAME}/notebook_workspace \
         /home/${USERNAME}/install 
-ADD --chown ${USERNAME}:${USERNAME} context/pythonlib /home/${USERNAME}/pythonlib
-ADD --chown ${USERNAME}:${USERNAME} context/00-first.ipy /home/${USERNAME}/.ipython/profile_default/startup/
-ADD --chown ${USERNAME}:${USERNAME} context/jupyter_notebook_config.py /home/${USERNAME}/.jupyter/
-ADD --chown ${USERNAME}:${USERNAME} context/custom.css /home/${USERNAME}/.jupyter/custom/
+ADD --chown=${USERNAME}:${USERNAME} context/pythonlib /home/${USERNAME}/pythonlib
+ADD --chown=${USERNAME}:${USERNAME} context/00-first.ipy /home/${USERNAME}/.ipython/profile_default/startup/
+ADD --chown=${USERNAME}:${USERNAME} context/jupyter_notebook_config.py /home/${USERNAME}/.jupyter/
+ADD --chown=${USERNAME}:${USERNAME} context/custom.css /home/${USERNAME}/.jupyter/custom/
 
 # To install cuid
 ENV LANG=en_US.UTF-8
