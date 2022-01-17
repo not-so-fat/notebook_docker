@@ -20,6 +20,7 @@ RUN apt-get update \
         nkf \
         libpng-dev libfreetype6-dev \
         postgresql-client libpq-dev \
+        sqlite3 \
         python3-dev \
         python3-pip
 
