@@ -2,5 +2,5 @@ numpy
 scipy
 sklearn
 conjurer
-mlflow
 jedi==0.17.2
+mlfields
