@@ -1,7 +1,8 @@
 FROM ubuntu:latest
 
-# USERID is important if you want to access files on host (refer build.sh also)
-ARG USERID=8888
+# If you are using Linux, USERID would be important to share files between container and host.
+# For Windows, Windows file has permission 777, and Windows user can read all the files.
+ARG USERID=1000
 ARG PASSWORD=neo
 # USERNAME is just internal and fixed (to use it in chown option for ADD)
 ENV USERNAME=neo
@@ -21,18 +22,16 @@ RUN apt-get update \
         libpng-dev libfreetype6-dev \
         postgresql-client libpq-dev \
         sqlite3 \
+        graphviz \
         python3-dev \
-        python3-pip
+        python3-pip \
+        python3-venv
 
-RUN pip3 install virtualenv
-
-RUN useradd -ms /bin/bash --uid ${USERID} ${USERNAME}
+# remove ubuntu user to use UID 1000 for us
+RUN userdel -rf ubuntu
+RUN useradd --no-log-init --create-home -ms /bin/bash --uid ${USERID} ${USERNAME}
 RUN usermod -aG sudo ${USERNAME}
 RUN echo "${USERNAME}:${PASSWORD}" | chpasswd
-RUN mkdir -p /home/${USERNAME}
-RUN mkdir /mlflow
-RUN chown -R ${USERNAME} /home/${USERNAME}
-RUN chown -R ${USERNAME} /mlflow
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/
@@ -46,7 +45,7 @@ ADD --chown=${USERNAME}:${USERNAME} context/custom.css /home/${USERNAME}/.jupyte
 
 # To install cuid
 ENV LANG=en_US.UTF-8
-RUN virtualenv -p python3 venv && chmod 700 ./venv/bin/activate
+RUN python3 -m venv venv && chmod 700 ./venv/bin/activate
 RUN venv/bin/pip install -U pip setuptools
 RUN venv/bin/pip install jupyter notebook pandas
 RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt

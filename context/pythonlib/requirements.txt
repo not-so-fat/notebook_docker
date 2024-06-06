@@ -1,6 +1,11 @@
 numpy
 scipy
-sklearn
+scikit-learn
 conjurer
 jedi==0.17.2
-mlfields
+pyarrow
+eli5
+fasttreeshap
+networkx
+graphviz
+causalml
