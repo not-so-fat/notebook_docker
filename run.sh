@@ -1,10 +1,12 @@
 #!/bin/sh
 set -eu
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 PORT" >&2
+if [ "$#" -eq 0 ] || [ "$#" -gt 2 ] || { [ "$#" -eq 2 ] && [ "$2" != --detach ]; }; then
+    echo "Usage: $0 PORT [--detach]" >&2
     exit 1
 fi
 
-docker run --rm --platform linux/amd64 -p "127.0.0.1:$1:8888" \
+port=$1
+shift
+exec docker run "$@" --rm --platform linux/amd64 -p "127.0.0.1:$port:8888" \
     -v "$PWD:/home/neo/notebook_workspace" my_notebook:0.0

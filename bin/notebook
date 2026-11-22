@@ -1,0 +1,101 @@
+#!/bin/bash
+set -euo pipefail
+
+usage() {
+    printf 'Usage: notebook [PORT]\nLaunch Jupyter in the current directory. The default port is 8888.\n'
+}
+
+if [[ ${1:-} == --help ]]; then
+    usage
+    exit 0
+fi
+
+requested_port=${1-8888}
+if [[ $# -gt 1 || ! $requested_port =~ ^[0-9]{1,5}$ ]] ||
+    (( 10#$requested_port < 1 || 10#$requested_port > 65535 )); then
+    usage >&2
+    exit 2
+fi
+port=$((10#$requested_port))
+
+# Resolve each link relative to its own directory (including relative links).
+script=${BASH_SOURCE[0]}
+while [[ -L $script ]]; do
+    link_dir=$(cd -- "$(dirname -- "$script")" && pwd -P)
+    script=$(readlink "$script")
+    [[ $script = /* ]] || script=$link_dir/$script
+done
+repo_dir=$(cd -- "$(dirname -- "$script")/.." && pwd -P)
+
+image=my_notebook:0.0
+if ! docker info >/dev/null; then
+    printf 'Start Docker and try again.\n' >&2
+    exit 1
+fi
+if ! docker image inspect "$image" >/dev/null 2>&1; then
+    printf 'Image %s is missing. Build it now? [y/N] ' "$image" >&2
+    if ! read -r answer || [[ $answer != [yY] && $answer != [yY][eE][sS] ]]; then
+        printf 'Image build declined. Notebook did not start.\n' >&2
+        exit 1
+    fi
+    "$repo_dir/build.sh"
+fi
+
+port_busy() {
+    if command -v lsof >/dev/null && lsof -nP -iTCP:"$1" -sTCP:LISTEN >/dev/null 2>&1; then
+        return 0
+    fi
+    if command -v nc >/dev/null; then
+        nc -z 127.0.0.1 "$1" >/dev/null 2>&1
+    else
+        return 1
+    fi
+}
+
+if ! command -v lsof >/dev/null && ! command -v nc >/dev/null; then
+    printf 'Port detection requires lsof or nc.\n' >&2
+    exit 1
+fi
+while port_busy "$port"; do
+    if (( port == 65535 )); then
+        printf 'No free port from %s through 65535.\n' "$requested_port" >&2
+        exit 1
+    fi
+    port=$((port + 1))
+done
+
+container=
+cleanup() {
+    if [[ -n $container ]]; then
+        docker stop "$container" >/dev/null 2>&1 || docker rm -f "$container" >/dev/null 2>&1 || true
+    fi
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+container=$("$repo_dir/run.sh" "$port" --detach)
+printf 'Jupyter is using host port %s. Press Ctrl-C to stop.\n' "$port"
+
+url_pattern='http://127\.0\.0\.1:8888/[^[:space:]]*\?token=[[:alnum:]]+'
+opened=false
+while IFS= read -r line; do
+    printf '%s\n' "$line"
+    if ! "$opened" && [[ $line =~ $url_pattern ]]; then
+        url=${BASH_REMATCH[0]/127.0.0.1:8888/127.0.0.1:$port}
+        printf 'Open %s\n' "$url"
+        case $(uname -s) in
+            Darwin) open "$url" >/dev/null 2>&1 & ;;
+            Linux)
+                if command -v xdg-open >/dev/null; then
+                    xdg-open "$url" >/dev/null 2>&1 &
+                fi
+                ;;
+        esac
+        opened=true
+    fi
+done < <(docker logs --follow "$container" 2>&1)
+
+if ! "$opened"; then
+    printf 'Jupyter logs ended before a token URL appeared.\n' >&2
+    exit 1
+fi
