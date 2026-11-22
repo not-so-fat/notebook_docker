@@ -1,0 +1,12 @@
+notebook>=7,<8
+pandas
+numpy
+scipy
+scikit-learn
+conjurer
+pyarrow
+eli5
+shap
+networkx
+graphviz
+causalml
