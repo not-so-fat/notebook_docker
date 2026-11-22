@@ -1,57 +1,44 @@
-FROM ubuntu:latest
+FROM ubuntu:24.04
 
-# If you are using Linux, USERID would be important to share files between container and host.
-# For Windows, Windows file has permission 777, and Windows user can read all the files.
 ARG USERID=1000
-ARG PASSWORD=neo
-# USERNAME is just internal and fixed (to use it in chown option for ADD)
-ENV USERNAME=neo
-ENV SHELL=/bin/bash
+ENV SHELL=/bin/bash \
+    LANG=C.UTF-8 \
+    PATH=/opt/venv/bin:$PATH \
+    PYTHONPATH=/home/neo/pythonlib
 
-USER root
 RUN apt-get update \
-    && apt-get install -y \
-        g++ \
-        make \
+    && apt-get install -y --no-install-recommends \
         bzip2 \
-        wget \
-        unzip \
-        sudo \
+        ca-certificates \
         git \
-        nkf \
-        libpng-dev libfreetype6-dev \
-        postgresql-client libpq-dev \
-        sqlite3 \
         graphviz \
-        python3-dev \
-        python3-pip \
-        python3-venv
+        libfreetype-dev \
+        libgomp1 \
+        libpng-dev \
+        libpq-dev \
+        nkf \
+        postgresql-client \
+        python3-venv \
+        sqlite3 \
+        unzip \
+        wget \
+    && rm -rf /var/lib/apt/lists/*
 
-# remove ubuntu user to use UID 1000 for us
-RUN userdel -rf ubuntu
-RUN useradd --no-log-init --create-home -ms /bin/bash --uid ${USERID} ${USERNAME}
-RUN usermod -aG sudo ${USERNAME}
-RUN echo "${USERNAME}:${PASSWORD}" | chpasswd
+COPY context/pythonlib/requirements.txt /tmp/requirements.txt
+RUN python3 -m venv /opt/venv \
+    && python -m pip install --no-cache-dir --only-binary=:all: -r /tmp/requirements.txt \
+    && python -m pip check
 
-USER ${USERNAME}
-WORKDIR /home/${USERNAME}/
-RUN mkdir -p /home/${USERNAME}/pythonlib \
-        /home/${USERNAME}/notebook_workspace \
-        /home/${USERNAME}/install 
-ADD --chown=${USERNAME}:${USERNAME} context/pythonlib /home/${USERNAME}/pythonlib
-ADD --chown=${USERNAME}:${USERNAME} context/00-first.ipy /home/${USERNAME}/.ipython/profile_default/startup/
-ADD --chown=${USERNAME}:${USERNAME} context/jupyter_notebook_config.py /home/${USERNAME}/.jupyter/
-ADD --chown=${USERNAME}:${USERNAME} context/custom.css /home/${USERNAME}/.jupyter/custom/
+# Ubuntu reserves UID 1000 for its default user.
+RUN if id ubuntu >/dev/null 2>&1; then userdel -r ubuntu; fi \
+    && useradd --no-log-init --create-home --shell /bin/bash --uid "${USERID}" neo \
+    && install -d -o neo -g neo /home/neo/notebook_workspace
 
-# To install cuid
-ENV LANG=en_US.UTF-8
-RUN python3 -m venv venv && chmod 700 ./venv/bin/activate
-RUN venv/bin/pip install -U pip setuptools
-RUN venv/bin/pip install jupyter notebook pandas
-RUN venv/bin/pip install -r /home/${USERNAME}/pythonlib/requirements.txt
+COPY --chown=neo:neo context/pythonlib /home/neo/pythonlib/
+COPY --chown=neo:neo context/00-first.ipy /home/neo/.ipython/profile_default/startup/
+COPY --chown=neo:neo context/jupyter_server_config.py /home/neo/.jupyter/
 
-WORKDIR /home/${USERNAME}/notebook_workspace
+USER neo
+WORKDIR /home/neo/notebook_workspace
 EXPOSE 8888
-ENV PYTHONPATH=/home/${USERNAME}/pythonlib/
-ENV PATH=/home/${USERNAME}/venv/bin:$PATH
-CMD ["../venv/bin/jupyter", "notebook"]
+CMD ["jupyter", "notebook"]

@@ -1,13 +1,5 @@
 #!/bin/bash
+set -eu
 
-USERID=`id -u`
-PASSWORD=$1
-
-if [ $# -eq 0 ]
-  then
-    echo "No password supplied"
-    exit 1
-fi
-
-echo $USERID
-docker build -t my_notebook:0.0 --build-arg USERID=$USERID --build-arg PASSWORD=$PASSWORD ./
+repo_dir=$(cd -- "$(dirname -- "$0")" && pwd)
+docker build --platform linux/amd64 -t my_notebook:0.0 --build-arg "USERID=$(id -u)" "$repo_dir"
