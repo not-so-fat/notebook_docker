@@ -8,5 +8,8 @@ fi
 
 port=$1
 shift
-exec docker run "$@" --rm --platform linux/amd64 -p "127.0.0.1:$port:8888" \
+if [ -n "${PLATFORM:-}" ]; then
+    set -- "$@" --platform "$PLATFORM"
+fi
+exec docker run "$@" --rm -p "127.0.0.1:$port:8888" \
     -v "$PWD:/home/neo/notebook_workspace" my_notebook:0.0

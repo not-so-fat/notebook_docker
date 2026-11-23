@@ -28,12 +28,24 @@ done
 repo_dir=$(cd -- "$(dirname -- "$script")/.." && pwd -P)
 
 image=my_notebook:0.0
-if ! docker info >/dev/null; then
+if ! engine_platform=$(docker info --format '{{.OSType}}/{{.Architecture}}'); then
     printf 'Start Docker and try again.\n' >&2
     exit 1
 fi
-if ! docker image inspect "$image" >/dev/null 2>&1; then
-    printf 'Image %s is missing. Build it now? [y/N] ' "$image" >&2
+case $engine_platform in
+    linux/aarch64) engine_platform=linux/arm64 ;;
+    linux/x86_64) engine_platform=linux/amd64 ;;
+esac
+target_platform=${PLATFORM:-${DOCKER_DEFAULT_PLATFORM:-$engine_platform}}
+image_platform=$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$image" 2>/dev/null) || image_platform=
+if [[ -z $image_platform ]]; then
+    printf 'Image %s is missing. ' "$image" >&2
+elif [[ $target_platform != "$image_platform" && $target_platform != "$image_platform/"* ]]; then
+    printf 'Image %s is %s, but %s was requested. ' "$image" "$image_platform" "$target_platform" >&2
+    image_platform=
+fi
+if [[ -z $image_platform ]]; then
+    printf 'Build it now? [y/N] ' >&2
     if ! read -r answer || [[ $answer != [yY] && $answer != [yY][eE][sS] ]]; then
         printf 'Image build declined. Notebook did not start.\n' >&2
         exit 1

@@ -6,4 +6,4 @@ if "%~1"=="" (
 )
 
 set "PORT=%~1"
-docker run --rm --platform linux/amd64 -p "127.0.0.1:%PORT%:8888" -v "%CD%:/home/neo/notebook_workspace" my_notebook:0.0
+docker run --rm -p "127.0.0.1:%PORT%:8888" -v "%CD%:/home/neo/notebook_workspace" my_notebook:0.0

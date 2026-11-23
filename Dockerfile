@@ -1,4 +1,28 @@
-FROM ubuntu:24.04
+# syntax=docker/dockerfile:1
+FROM ubuntu:24.04 AS wheels
+
+ARG TARGETARCH
+COPY context/pythonlib/requirements.txt /tmp/requirements.txt
+RUN apt-get update \
+    && set -- ca-certificates python3-venv \
+    && if [ "$TARGETARCH" = arm64 ]; then set -- "$@" build-essential python3-dev; fi \
+    && apt-get install -y --no-install-recommends "$@" \
+    && rm -rf /var/lib/apt/lists/*
+
+# The arm64 causalml sdist needs NumPy and scikit-learn headers.
+# Use the runtime pins to build against the same versions installed below.
+RUN python3 -m venv /opt/build-venv \
+    && set -- --only-binary=:all: \
+    && if [ "$TARGETARCH" = arm64 ]; then \
+        /opt/build-venv/bin/python -m pip install --no-cache-dir --only-binary=:all: \
+            -c /tmp/requirements.txt setuptools==84.2.1 wheel==0.48.0 Cython==3.3.1 \
+            numpy scikit-learn \
+        && set -- "$@" --no-binary=causalml --no-build-isolation; \
+    fi \
+    && /opt/build-venv/bin/python -m pip wheel --no-cache-dir "$@" \
+        --wheel-dir /wheels -r /tmp/requirements.txt
+
+FROM ubuntu:24.04 AS runtime
 
 ARG USERID=1000
 ENV SHELL=/bin/bash \
@@ -25,8 +49,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY context/pythonlib/requirements.txt /tmp/requirements.txt
-RUN python3 -m venv /opt/venv \
-    && python -m pip install --no-cache-dir --only-binary=:all: -r /tmp/requirements.txt \
+RUN --mount=type=bind,from=wheels,source=/wheels,target=/wheels \
+    python3 -m venv /opt/venv \
+    && python -m pip install --no-cache-dir --no-index --find-links=/wheels \
+        --only-binary=:all: -r /tmp/requirements.txt \
     && python -m pip check
 
 # Ubuntu reserves UID 1000 for its default user.

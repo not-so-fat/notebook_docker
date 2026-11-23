@@ -1,12 +1,12 @@
 # JupyterLab in Docker
 
 This image runs JupyterLab on Ubuntu 24.04 with Python 3.12 and includes
-pandas, NumPy, SciPy, scikit-learn, SHAP, and causalml. Use
+pandas, NumPy, SciPy, scikit-learn, SHAP, causalml, and edahub. Use
 `shap.TreeExplainer` in notebooks that previously used FastTreeSHAP.
 
 ## Use it from any folder
 
-Install and start Docker Desktop. Clone the repository and build the
+Start OrbStack or another Docker engine. Clone the repository and build the
 `my_notebook:0.0` image once:
 
 ```sh
@@ -15,8 +15,9 @@ cd ~/tools/notebook_docker
 ./build.sh
 ```
 
-The build targets `linux/amd64` for Python wheel availability. Docker Desktop
-emulates amd64 on Apple Silicon, so it can be slower than a native image.
+The image builds natively by default, using `linux/arm64` on Apple Silicon and
+`linux/amd64` on Intel. The first arm64 build takes longer because the builder
+compiles a causalml wheel. The runtime image installs the finished wheels.
 
 If you already built an earlier image, rerun `./build.sh` to update it.
 
@@ -68,20 +69,25 @@ also retrieve it while the container is running with `docker ps` followed by
 `docker logs <container-id>`. If you chose a different host port, replace
 `8888` in the logged URL with that port and retain the token.
 
-## Try a native arm64 build
+## Override the platform
 
-From the repository checkout, try the existing pins with a separate image tag:
+Set `PLATFORM` on both the build and launch when you need a different
+architecture:
 
 ```sh
-docker build --platform linux/arm64 --build-arg "USERID=$(id -u)" -t my_notebook:arm64 .
-docker run --rm --platform linux/arm64 -p 127.0.0.1:8888:8888 \
-  -v "$PWD:/home/neo/notebook_workspace" my_notebook:arm64
+PLATFORM=linux/amd64 ./build.sh
+PLATFORM=linux/amd64 notebook
 ```
 
-If a pinned wheel is unavailable for arm64, try resolving the dependencies in
-a separate checkout using the command below with
-`--python-platform aarch64-manylinux_2_28`. Keep the amd64 lockfile for the
-default build.
+The same override works with `run.sh`. Both architectures use the tag
+`my_notebook:0.0`. To switch back, rebuild with `./build.sh` and launch without
+the override. The `notebook` command also offers to rebuild a mismatched image.
+
+On Apple Silicon with OrbStack, forcing `linux/amd64` with **Use Rosetta to run
+Intel code** enabled caused Jupyter kernels to hang. The native arm64 build
+avoids emulation. If you need amd64 on OrbStack, turning Rosetta off restored
+kernel execution in the reported setup. See [OrbStack issue #2806](https://github.com/orbstack/orbstack/issues/2806)
+for a related ZeroMQ hang.
 
 ## Update Python dependencies
 
@@ -89,8 +95,8 @@ Edit `context/pythonlib/requirements.in`, then regenerate the pinned
 requirements from the repository root:
 
 ```sh
-uv pip compile --python-version 3.12 --python-platform x86_64-manylinux_2_28 \
-  --only-binary :all: context/pythonlib/requirements.in -o context/pythonlib/requirements.txt
+uv pip compile --universal --python-version 3.12 \
+  context/pythonlib/requirements.in -o context/pythonlib/requirements.txt
 ```
 
 Add `--upgrade` to refresh existing pins. The image installs the pinned
