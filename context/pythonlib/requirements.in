@@ -1,9 +1,11 @@
 notebook>=7,<8
+jupyterlab
 pandas
 numpy
 scipy
 scikit-learn
 conjurer
+edahub>=0.1.1
 pyarrow
 eli5
 shap
