@@ -1,6 +1,6 @@
-# Jupyter Notebook in Docker
+# JupyterLab in Docker
 
-This image runs Notebook 7 on Ubuntu 24.04 with Python 3.12 and includes
+This image runs JupyterLab on Ubuntu 24.04 with Python 3.12 and includes
 pandas, NumPy, SciPy, scikit-learn, SHAP, and causalml. Use
 `shap.TreeExplainer` in notebooks that previously used FastTreeSHAP.
 
@@ -18,6 +18,8 @@ cd ~/tools/notebook_docker
 The build targets `linux/amd64` for Python wheel availability. Docker Desktop
 emulates amd64 on Apple Silicon, so it can be slower than a native image.
 
+If you already built an earlier image, rerun `./build.sh` to update it.
+
 Add a symlink to the [launcher](bin/notebook) in a directory on your PATH:
 
 ```sh
@@ -34,7 +36,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ```
 
 To keep that PATH change for future terminals, add the export to your shell
-startup file. Launch Notebook from the directory where you want to work:
+startup file. Launch JupyterLab from the directory where you want to work:
 
 ```sh
 cd ~/Documents/my-analysis && notebook
@@ -45,6 +47,8 @@ to stop Jupyter and remove the container. The launcher publishes Jupyter on
 `127.0.0.1` only, prints the token URL, and opens it in the browser when
 available. It starts at port 8888 and picks the next free port when needed.
 Use `notebook 9000` to start the search at port 9000, or `notebook --help` for usage.
+The launcher opens `/lab`. To use the Notebook interface, visit `/tree` on
+the same host and port after signing in.
 
 ## Run without installing the launcher
 

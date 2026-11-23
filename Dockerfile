@@ -41,4 +41,4 @@ COPY --chown=neo:neo context/jupyter_server_config.py /home/neo/.jupyter/
 USER neo
 WORKDIR /home/neo/notebook_workspace
 EXPOSE 8888
-CMD ["jupyter", "notebook"]
+CMD ["jupyter", "lab"]

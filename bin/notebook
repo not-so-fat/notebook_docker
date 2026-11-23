@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-    printf 'Usage: notebook [PORT]\nLaunch Jupyter in the current directory. The default port is 8888.\n'
+    printf 'Usage: notebook [PORT]\nLaunch JupyterLab in the current directory. The default port is 8888.\n'
 }
 
 if [[ ${1:-} == --help ]]; then
@@ -74,9 +74,9 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 container=$("$repo_dir/run.sh" "$port" --detach)
-printf 'Jupyter is using host port %s. Press Ctrl-C to stop.\n' "$port"
+printf 'JupyterLab is using host port %s. Press Ctrl-C to stop.\n' "$port"
 
-url_pattern='http://127\.0\.0\.1:8888/[^[:space:]]*\?token=[[:alnum:]]+'
+url_pattern='http://127\.0\.0\.1:8888/lab\?token=[[:alnum:]]+'
 opened=false
 while IFS= read -r line; do
     printf '%s\n' "$line"
@@ -96,6 +96,6 @@ while IFS= read -r line; do
 done < <(docker logs --follow "$container" 2>&1)
 
 if ! "$opened"; then
-    printf 'Jupyter logs ended before a token URL appeared.\n' >&2
+    printf 'JupyterLab logs ended before a token URL appeared.\n' >&2
     exit 1
 fi
